@@ -1,0 +1,17 @@
+# Validated/canonical artifacts are preserved byte-for-byte.
+# Do not normalize line endings or treat existing whitespace as an error.
+
+docs/00-brief.md -text -whitespace
+docs/01-prd.md -text -whitespace
+docs/01a-ux-spec.md -text -whitespace
+docs/02-architecture.md -text -whitespace
+docs/03-project-context.md -text -whitespace
+docs/reviews/prd-validation-final-result-v1.0.md -text -whitespace
+docs/reviews/architecture-readiness-targeted-recheck-result-v0.2.md -text -whitespace
+
+PHASE3-FINAL-MANIFEST.md -text -whitespace
+CANONICAL-REPO-MANIFEST.md -text -whitespace
+PROJECT_KICKOFF.md -text -whitespace
+
+# Project-scoped third-party skills are vendored from upstream.
+.agents/skills/** -text -whitespace
