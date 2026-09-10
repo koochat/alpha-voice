@@ -1,5 +1,5 @@
 # Story E0-S2: PostgreSQL Development Baseline
-> Status: todo | Branch: feat/e0-s2-postgres-baseline
+> Status: done | Branch: feat/e0-s2-postgres-baseline
 
 ## WHAT — ต้องสร้างอะไร
 สร้าง PostgreSQL development baseline สำหรับ AlphaVoice: local PostgreSQL container, API database configuration, EF Core migration infrastructure และ fresh-database smoke validation โดยยังไม่สร้าง business/domain schema.

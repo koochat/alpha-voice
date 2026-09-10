@@ -63,8 +63,6 @@ if ($projectFiles.Count -eq 1) {
 
         # E0-S1 should not need DB/auth/broker/cache infrastructure packages.
         $prohibitedPackagePatterns = @(
-            "EntityFrameworkCore",
-            "Npgsql",
             "StackExchange.Redis",
             "RabbitMQ",
             "Kafka"
@@ -109,8 +107,6 @@ if (Test-Path -LiteralPath $programPath -PathType Leaf) {
 
     $prohibitedProgramPatterns = @(
         "WeatherForecast",
-        "AddDbContext",
-        "UseNpgsql",
         "AddAuthentication",
         "AddAuthorization",
         "\.MapGet\s*\(",
