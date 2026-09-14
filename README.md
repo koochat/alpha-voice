@@ -60,7 +60,7 @@ Build:
 
 Run locally:
 
-    dotnet run --project .\apps\api\AlphaVoice.Api.csproj
+    dotnet run --project .\apps\api\AlphaVoice.Api.csproj --urls http://127.0.0.1:5080
 
 ## E0-S1 Validation
 
@@ -144,7 +144,7 @@ Set the ASP.NET Core environment explicitly:
 
 Start the API:
 
-    dotnet run --project .\apps\api\AlphaVoice.Api.csproj
+    dotnet run --project .\apps\api\AlphaVoice.Api.csproj --urls http://127.0.0.1:5080
 
 When finished, remove the temporary environment override:
 
@@ -171,3 +171,71 @@ Run the disposable PostgreSQL smoke test:
 The smoke test starts a temporary PostgreSQL container with a random host port and password, applies the complete migration chain from an empty database, verifies that no business tables are created, checks migration idempotency, and removes the temporary container when finished.
 
 It does not delete or reset the normal local development PostgreSQL database.
+
+## E0-S3 Same-Origin Native Development
+
+Browser-facing native development preserves the AlphaVoice same-origin boundary:
+
+    Browser
+      |
+      | http://localhost:3000/*
+      v
+    Next.js
+      |
+      | /api/* rewrite
+      v
+    ASP.NET Core at http://127.0.0.1:5080
+
+Normal frontend application code calls relative `/api/*` paths only. The browser does not call the ASP.NET Core port directly.
+
+### Start the API
+
+Complete the PostgreSQL development startup and migration steps first.
+
+Set the ASP.NET Core environment:
+
+    $env:ASPNETCORE_ENVIRONMENT = "Development"
+
+Run the native API on the E0-S3 development port:
+
+    dotnet run --project .\apps\api\AlphaVoice.Api.csproj --urls http://127.0.0.1:5080
+
+The direct ASP.NET Core origin is reserved for tests and tooling.
+
+### Start the Web application
+
+In a separate terminal:
+
+    npm run dev --prefix .\apps\web
+
+The normal browser origin is:
+
+    http://localhost:3000
+
+Frontend requests use relative paths such as:
+
+    /api/dev-probe
+
+Next.js rewrites `/api/*` to the native ASP.NET Core process.
+
+The proxy target defaults to:
+
+    http://127.0.0.1:5080
+
+A different native API origin may be supplied to the Next.js server process when required:
+
+    $env:ALPHAVOICE_API_ORIGIN = "http://127.0.0.1:<port>"
+
+`ALPHAVOICE_API_ORIGIN` is server-side development configuration. Do not expose the API origin through `NEXT_PUBLIC_*` configuration or use it from browser application code.
+
+### Validate the same-origin development boundary
+
+With both native processes running:
+
+    powershell -NoProfile -ExecutionPolicy Bypass -File .\tests\smoke-same-origin-dev.ps1
+
+Static guardrails:
+
+    powershell -NoProfile -ExecutionPolicy Bypass -File .\tests\validate-same-origin-dev.ps1
+
+The direct API URL may be used by tests/tooling, but it is not the normal browser application path.

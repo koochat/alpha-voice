@@ -109,7 +109,6 @@ if (Test-Path -LiteralPath $programPath -PathType Leaf) {
         "WeatherForecast",
         "AddAuthentication",
         "AddAuthorization",
-        "\.MapGet\s*\(",
         "\.MapPost\s*\(",
         "\.MapPut\s*\(",
         "\.MapPatch\s*\(",
@@ -118,8 +117,19 @@ if (Test-Path -LiteralPath $programPath -PathType Leaf) {
 
     foreach ($pattern in $prohibitedProgramPatterns) {
         if ($programContent -match $pattern) {
-            Add-Failure "Program.cs contains behavior outside the minimal E0-S1 API host shell: $pattern"
+            Add-Failure "Program.cs contains behavior outside the approved foundation API host: $pattern"
         }
+    }
+
+    # E0-S3 permits exactly one minimal GET probe for validating the
+    # same-origin native development boundary. Other GET endpoints remain
+    # outside the foundation scope at this point.
+    $programWithoutApprovedDevProbe = $programContent -replace `
+        '(?s)app\.MapGet\s*\(\s*["'']/api/dev-probe["''].*?\)\s*;', `
+        ''
+
+    if ($programWithoutApprovedDevProbe -match "\.MapGet\s*\(") {
+        Add-Failure "Program.cs contains an unapproved GET endpoint outside the E0-S3 development probe"
     }
 }
 

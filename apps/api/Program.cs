@@ -17,4 +17,13 @@ builder.Services.AddDbContext<AlphaVoiceDbContext>(options =>
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.MapGet("/api/dev-probe", () =>
+        Results.Ok(new
+        {
+            message = "AlphaVoice API reachable through same-origin development routing"
+        }));
+}
+
 app.Run();
