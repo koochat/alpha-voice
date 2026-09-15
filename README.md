@@ -239,3 +239,44 @@ Static guardrails:
     powershell -NoProfile -ExecutionPolicy Bypass -File .\tests\validate-same-origin-dev.ps1
 
 The direct API URL may be used by tests/tooling, but it is not the normal browser application path.
+
+## E0-S4 OpenAPI Contracts and Gate 1
+
+ASP.NET Core owns the AlphaVoice API contract.
+
+Generate the OpenAPI-derived TypeScript client/types:
+
+    powershell -NoProfile -ExecutionPolicy Bypass -File .\contracts\generate-contracts.ps1
+
+The generation process:
+
+1. restores repository-local .NET tools;
+2. restores and builds the ASP.NET Core API;
+3. produces the build-time OpenAPI document at `apps/api/obj/openapi/AlphaVoice.Api.json`;
+4. generates `contracts/generated/alphaVoiceApi.generated.ts` through the pinned NSwag tool.
+
+`contracts/generated/alphaVoiceApi.generated.ts` is generated code. Do not edit it by hand.
+
+After changing an ASP.NET API contract, regenerate the TypeScript artifact and commit the updated generated file.
+
+Validate generated-contract drift:
+
+    powershell -NoProfile -ExecutionPolicy Bypass -File .\tests\validate-contract-drift.ps1
+
+The drift check fails when the committed generated TypeScript artifact does not match a fresh OpenAPI-derived generation.
+
+Run the deterministic Gate 1 locally:
+
+    powershell -NoProfile -ExecutionPolicy Bypass -File .\tests\run-gate1.ps1
+
+Gate 1 runs:
+
+- repository-local .NET tool restore;
+- ASP.NET Core restore and build;
+- .NET test projects when present;
+- Web dependency install, lint, type-check, and production build;
+- generated-contract drift validation.
+
+GitHub Actions runs the same Gate 1 entry point from `.github/workflows/gate1.yml`.
+
+PostgreSQL integration/security tests, container validation, selected E2E, live external-source validation, and benchmark/evidence suites are intentionally outside Gate 1.
